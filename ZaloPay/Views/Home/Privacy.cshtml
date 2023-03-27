@@ -1,0 +1,21 @@
+﻿@using ZaloPayGateway.Models
+@{
+    ViewData["Title"] = "Privacy Policy";
+    OrderQueryResult? result = ViewData["result"] as OrderQueryResult;
+}
+<h1>@ViewData["Title"]</h1>
+<form>
+    <div>Mã order <input name="appTransId" /></div>
+    <button type="submit">Submit</button>
+</form>
+@if (result != null)
+{
+    <ul>
+        <li><strong>IsProcessing:</strong> @result.IsProcessing</li>
+        <li><strong>Amount:</strong> @result.Amount</li>
+        <li><strong>ReturnCode:</strong> @result.ReturnCode</li>
+        <li><strong>SubReturnCode:</strong> @result.SubReturnCode</li>
+        <li><strong>SubReturnMessage:</strong> @result.SubReturnMessage</li>
+        <li><strong>ZpTransId:</strong> @result.ZpTransId</li>
+    </ul>
+}

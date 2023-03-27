@@ -1,0 +1,14 @@
+﻿@model ZaloPay.Models.CreateOrder;
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Payment</h1>
+    <form method="POST">
+        <label><input type="radio" asp-for="BankCode" value="ATM"/>ATM</label><br/>
+        <label><input type="radio" asp-for="BankCode" value="CC"/>Visa, Master, JCB</label><br/>
+        <label><input type="radio" asp-for="BankCode" value="zalopayapp"/>Ví ZaloPay</label><br/>
+        <button type="submit">Submit</button>
+    </form>
+</div>
