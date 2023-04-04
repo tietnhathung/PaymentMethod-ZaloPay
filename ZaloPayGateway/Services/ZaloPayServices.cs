@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Net.Mime;
+using System.Text;
+using Microsoft.Extensions.Configuration;
 using ZaloPayGateway.Helpers;
 using ZaloPayGateway.Models;
 
@@ -9,7 +11,7 @@ public class ZaloPayServices : IZaloPayServices
     private const string BaseUrl = "https://sb-openapi.zalopay.vn/v2";
     private const string CreateOrderUrl = "/create";
     private const string QueryOrderUrl = "/query";
-    private readonly HttpClient _httpClient = new();
+    private readonly HttpClient _httpClient;
     private readonly string _appUser = "PruGift";
     private readonly int _appId;
     private readonly string _key1;
@@ -20,6 +22,9 @@ public class ZaloPayServices : IZaloPayServices
         _appId = int.Parse(config.GetSection("ZaloPay:AppId").Value ?? "0");
         _key1 = config.GetSection("ZaloPay:Key1").Value ?? "";
         _key2 = config.GetSection("ZaloPay:Key2").Value ?? "";
+        _httpClient = new HttpClient();
+        _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json; charset=UTF-8");
+        _httpClient.BaseAddress = new Uri(BaseUrl);
     }
 
     public ZaloPayOrderCreate BuildZaloPayOrderCreate(string orderId, long amount, string items, string bankCode,
@@ -67,7 +72,7 @@ public class ZaloPayServices : IZaloPayServices
     private async Task<T?> PostMethod<T>(string url, IBaseFormRequest form)
     {
         var content = new FormUrlEncodedContent(form.ToDictionary());
-        var response = await _httpClient.PostAsync(BaseUrl + url, content);
+        var response = await _httpClient.PostAsync(url, content);
         var responseString = await response.Content.ReadAsStringAsync();
         return JsonConvertHelper.DeserializeObject<T>(responseString);
     }
@@ -80,8 +85,7 @@ public class ZaloPayServices : IZaloPayServices
 
     public bool ValidateRedirect(RedirectOrder redirectOrder)
     {
-        var checksumData =
-            $"{redirectOrder.Appid}|{redirectOrder.Apptransid}|{redirectOrder.Pmcid}|{redirectOrder.Bankcode}|{redirectOrder.Amount}|{redirectOrder.Discountamount}|{redirectOrder.Status}";
+        var checksumData = $"{redirectOrder.Appid}|{redirectOrder.Apptransid}|{redirectOrder.Pmcid}|{redirectOrder.Bankcode}|{redirectOrder.Amount}|{redirectOrder.Discountamount}|{redirectOrder.Status}";
         var mac = HmacHelper.Compute(_key2, checksumData);
         return mac.Equals(redirectOrder.Checksum);
     }
